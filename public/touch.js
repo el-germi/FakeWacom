@@ -87,6 +87,42 @@
 		};
 	}
 
+	// Browsers only go fullscreen from a user gesture, so the first tap of the page asks for it.
+	// Mouse counts as a gesture on down, touch and pen only on up, so it asks on both. That tap is
+	// used up instead of clicking on the PC. One try per page load, so a refused request can't keep
+	// eating taps.
+	var root = document.documentElement;
+	var goFullscreen = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+	var fullscreenTapId = null;
+
+	function isFullscreen() {
+		return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+	}
+
+	function requestFullscreen() {
+		if (isFullscreen()) return;
+		try {
+			var result = goFullscreen.call(root);
+			if (result && result.then) result.then(null, function () {}); // refused: not a gesture yet
+		} catch (e) {}
+	}
+
+	// True when the event belongs to the fullscreen tap and must not reach the PC.
+	function fullscreenTap(type, id) {
+		if (!goFullscreen) return false;
+		if (type === "down" && fullscreenTapId === null) {
+			if (isFullscreen()) {
+				goFullscreen = null;
+				return false;
+			}
+			fullscreenTapId = id;
+		}
+		if (id !== fullscreenTapId) return false;
+		if (type === "down" || type === "up") requestFullscreen();
+		if (type === "up" || type === "cancel") goFullscreen = null;
+		return true;
+	}
+
 	function now() {
 		return Math.round(window.performance && performance.now ? performance.now() : new Date().getTime());
 	}
@@ -118,6 +154,7 @@
 		};
 		var onPointer = function (e) {
 			e.preventDefault();
+			if (fullscreenTap(names[e.type], e.pointerId)) return;
 			// A browser merges several samples into one pointermove; send them all so strokes stay smooth.
 			var samples = e.type === "pointermove" && e.getCoalescedEvents ? e.getCoalescedEvents() : null;
 			if (samples && samples.length) {
@@ -134,6 +171,7 @@
 			e.preventDefault();
 			for (var i = 0; i < e.changedTouches.length; i++) {
 				var t = e.changedTouches[i];
+				if (fullscreenTap(touchNames[e.type], t.identifier)) continue;
 				send({
 					type: touchNames[e.type],
 					id: t.identifier,
