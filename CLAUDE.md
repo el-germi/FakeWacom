@@ -8,7 +8,7 @@ A Windows-only "remote drawing tablet": a phone/tablet opens the page in a brows
 
 ## Commands
 
-- `npm start` runs `node --watch a.ts`. Node 24 runs the `.ts` files directly through type stripping, so there is no build step. Imports therefore use explicit `.ts` extensions, and the code sticks to erasable TypeScript syntax (`verbatimModuleSyntax`, no enums or namespaces).
+- `npm start` runs `node --watch main.ts`. Node 24 runs the `.ts` files directly through type stripping, so there is no build step. Imports therefore use explicit `.ts` extensions, and the code sticks to erasable TypeScript syntax (`verbatimModuleSyntax`, no enums or namespaces).
 - There are no tests and no lint setup. `tsconfig.json` is `noEmit` and only used for type checking, but `typescript` isn't installed; use `npx -p typescript tsc` to type-check.
 - Open the pad at `http://<pc-ip>:3000/?token=<token>`. The token comes from `PAD_TOKEN`, or from `.pad-token`, which is generated on first run.
 
@@ -23,7 +23,7 @@ Environment variables:
 
 The modules call Win32 directly through **koffi** FFI (user32/gdi32/kernel32). They have no native addon of their own.
 
-- [a.ts](a.ts) is the Express server and serves `public/`. One WebSocket at `/touch`, authorized by the token, carries both directions:
+- [main.ts](main.ts) is the Express server and serves `public/`. One WebSocket at `/touch`, authorized by the token, carries both directions:
   - client → server: JSON text messages. `hello` sends the viewport size, pointer events go to that connection's pen, and `ack` acknowledges a frame.
   - server → client: binary JPEG frames. Flow control allows `MAX_IN_FLIGHT` unacked frames per viewer. When the client is busy, the newest frame is parked in `pending` and sent on the next ack, so a slow link drops frames instead of adding latency, and a static screen never leaves a stale image.
   - It also logs visitor headers and what `public/client-info.js` posts to `/__client-info`.
