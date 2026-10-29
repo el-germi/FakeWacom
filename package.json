@@ -1,0 +1,24 @@
+{
+	"name": "pad",
+	"version": "1.0.0",
+	"description": "",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node --watch a.ts"
+	},
+	"dependencies": {
+		"express": "^5.3.0",
+		"koffi": "^3.3.5",
+		"sharp": "^0.35.5",
+		"ws": "^8.22.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.6",
+		"@types/node": "^26.6.5",
+		"@types/ws": "^8.18.2"
+	}
+}

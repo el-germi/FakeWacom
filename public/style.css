@@ -1,0 +1,44 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+/* The PC screen, stretched over the whole page so it lines up with where the pen lands. */
+#screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#hud {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* Full-screen touch surface; touch-action none stops the browser scrolling/zooming instead of reporting the touch. */
+#pad {
+  z-index: 1;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -ms-touch-action: none;
+  touch-action: none;
+  -ms-content-zooming: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
