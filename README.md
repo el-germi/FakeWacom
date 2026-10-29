@@ -28,13 +28,13 @@ npm install
 
    The first time it runs, Windows Firewall may ask whether to allow Node.js. Allow it on private networks.
 
-2. The console prints the address to open, for example:
+2. The console prints the address to open, with a QR code for it, for example:
 
    ```
-   Open the pad at http://<this-pc-ip>:3000/?token=1a2b3c...
+   Open the pad at http://192.168.1.9:3000/?token=1a2b3c...
    ```
 
-   Replace `<this-pc-ip>` with the PC's LAN address (run `ipconfig` to find it) and open that URL on the tablet.
+   Scan the QR code with the tablet's camera, or type the URL. If the PC has several network adapters, the other candidate addresses are listed below it; if the first one doesn't load, try those.
 
 3. Tap once. The first tap switches the page to fullscreen and is not sent to the PC. After that, draw.
 

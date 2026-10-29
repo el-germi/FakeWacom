@@ -1,7 +1,9 @@
 import express from "express";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import qrcode from "qrcode-terminal";
 import { WebSocket, WebSocketServer } from "ws";
 import { createPen } from "./pen.ts";
 import { startScreenStream } from "./stream.ts";
@@ -57,7 +59,30 @@ const token =
 			fs.writeFileSync(tokenFile, t);
 			return t;
 		})());
-console.log(`Open the pad at http://<this-pc-ip>:${port}/?token=${token}`);
+
+// The address the tablet should use. With HOST left at all interfaces, pick the LAN adapter's IPv4:
+// skip VM adapters (by name, or by the hypervisor's MAC prefix, since VirtualBox's is just "Ethernet 2"),
+// list VPN overlays last, and otherwise prefer the usual home-router ranges.
+function lanAddresses() {
+	if (host !== "0.0.0.0" && host !== "::") return [host];
+	const virtualName = /vEthernet|WSL|Hyper-V|VirtualBox|VMware|Docker|Loopback|Bluetooth/i;
+	const virtualMac = /^(00:15:5d|0a:00:27|08:00:27|00:50:56|00:0c:29|00:05:69|00:1c:14)/i;
+	const vpnName = /ZeroTier|Tailscale|VPN|WireGuard|OpenVPN|TAP|Hamachi/i;
+	const rank = (name: string, ip: string) =>
+		(vpnName.test(name) ? 10 : 0) +
+		(ip.startsWith("192.168.") ? 0 : ip.startsWith("10.") ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(ip) ? 2 : 3);
+	return Object.entries(os.networkInterfaces())
+		.filter(([name]) => !virtualName.test(name))
+		.flatMap(([name, addrs]) => (addrs ?? []).map((a) => ({ name, ...a })))
+		.filter((a) => a.family === "IPv4" && !a.internal && !a.address.startsWith("169.254.") && !virtualMac.test(a.mac))
+		.sort((a, b) => rank(a.name, a.address) - rank(b.name, b.address))
+		.map((a) => a.address);
+}
+const [lanIp = "localhost", ...otherIps] = lanAddresses();
+const padUrl = (ip: string) => `http://${ip}:${port}/?token=${token}`;
+console.log(`\nOpen the pad at ${padUrl(lanIp)}`);
+for (const ip of otherIps) console.log(`            or ${padUrl(ip)}`);
+qrcode.generate(padUrl(lanIp), { small: true });
 
 const logTouch = process.env.TOUCH_LOG === "1"; // one line per event floods the console while drawing
 

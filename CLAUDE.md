@@ -10,7 +10,7 @@ A Windows-only "remote drawing tablet": a phone/tablet opens the page in a brows
 
 - `npm start` runs `node --watch main.ts`. Node 24 runs the `.ts` files directly through type stripping, so there is no build step. Imports therefore use explicit `.ts` extensions, and the code sticks to erasable TypeScript syntax (`verbatimModuleSyntax`, no enums or namespaces).
 - There are no tests and no lint setup. `tsconfig.json` is `noEmit` and only used for type checking, but `typescript` isn't installed; use `npx -p typescript tsc` to type-check.
-- Open the pad at `http://<pc-ip>:3000/?token=<token>`. The token comes from `PAD_TOKEN`, or from `.pad-token`, which is generated on first run.
+- Open the pad at `http://<pc-ip>:3000/?token=<token>`. The token comes from `PAD_TOKEN`, or from `.pad-token`, which is generated on first run. On startup the console prints that URL with the detected LAN IPv4 (virtual adapters like WSL/Hyper-V are skipped) and a QR code via `qrcode-terminal`.
 
 Environment variables:
 
